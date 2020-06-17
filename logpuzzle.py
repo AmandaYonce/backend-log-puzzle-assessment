@@ -62,9 +62,9 @@ def download_images(img_urls, dest_dir):
             f.write(f'<img src={image}>')
         f.write("</body>")
         f.write("</html>")
-    print("*" * 50)
+    print("*" * 60)
     print("Open the index.html file in a browser to see the final image")
-    print("*" * 50)
+    print("*" * 60)
 
 
 def create_parser():
