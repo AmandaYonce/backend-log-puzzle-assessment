@@ -26,8 +26,17 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    server = filename[re.search(r"_(.*?)", filename).span()[1]:]
+    urls = []
+    with open(filename, "r") as f:
+        for line in f:
+            paths = re.findall(r'GET \S+ HTTP', line)
+            for path in paths:
+                if path[5:-5] not in urls and "puzzle" in path:
+                    urls.append(path[5:-5])
+            urls.sort(key=lambda x: x[-8:-4])
+    urls = list(map(lambda each: "http://"+server + "/" + each, urls))
+    return urls
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +47,24 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    image_list = []
+    if not os.path.isdir(dest_dir):
+        os.makedirs(dest_dir)
+    for i, each in enumerate(img_urls):
+        print(f"Downloading File # {i} of {len(img_urls)}")
+        file_name = dest_dir + "/img" + str(i) + each[-4:]
+        urllib.request.urlretrieve(each, file_name)
+        image_list.append("img" + str(i) + each[-4:])
+    with open(dest_dir + "/index.html", 'a') as f:
+        f.write("<html>")
+        f.write("<body>")
+        for image in image_list:
+            f.write(f'<img src={image}>')
+        f.write("</body>")
+        f.write("</html>")
+    print("*" * 50)
+    print("Open the index.html file in a browser to see the final image")
+    print("*" * 50)
 
 
 def create_parser():
@@ -55,13 +80,11 @@ def create_parser():
 def main(args):
     """Parses args, scans for URLs, gets images from URLs."""
     parser = create_parser()
-
     if not args:
         parser.print_usage()
         sys.exit(1)
 
     parsed_args = parser.parse_args(args)
-
     img_urls = read_urls(parsed_args.logfile)
 
     if parsed_args.todir:
